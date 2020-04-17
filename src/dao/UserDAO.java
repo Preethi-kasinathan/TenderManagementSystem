@@ -6,7 +6,11 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
+import model.TenderRequest;
+import model.Tender_Authority;
 import model.User;
 import service.UserDAOInterface;
 import utility.ConnectionManager;
@@ -98,11 +102,31 @@ public class UserDAO implements UserDAOInterface {
 		
 		while(rs.next())
 		{
-			if(emlid.equals(user.getString) && pswd.equals(user.getString("password")))
+			if(rs!=null)
 			{
 				con.close();
 				System.out.println("LOGIN SUCCESSFULLY");
-				// whatever you want any method to call you can create object and call a method in this space.
+				System.out.println();
+				System.out.println("********** DETAILS OF ALL TENDERS **************");
+				// CALL A METHOD ALL_TENDER_DETAILS();
+				System.out.println();
+				System.out.println(" DO YOU WANT TO GIVE A TENDER REQUEST ENTER YES OR NO ? ");
+				String ys = "YES";
+				String no = "NO";
+				String ys_no = bfrd.readLine();
+				
+				if(ys_no.equals(ys))
+				{
+					TenderRequestDAO tndr_rqst = new TenderRequestDAO();
+					tndr_rqst.tender_request();
+				}
+				else
+				{
+					System.out.println();
+					System.out.println("THANK YOU FOR VISIT OUR SITE");
+					System.out.println("******** VISIT AGAIN *******");
+				}
+				
 			}
 			else
 			{
@@ -114,5 +138,73 @@ public class UserDAO implements UserDAOInterface {
 		
 		return false;
 	}
+
+	@Override
+	public boolean Authoritylogin(Tender_Authority tndr_autry) throws ClassNotFoundException, Exception {
+		
+		BufferedReader bfrd = new BufferedReader(new InputStreamReader(System.in));
+		ConnectionManager cmgr = new ConnectionManager();
+		Connection con = cmgr.getConnection();
+		
+		System.out.println("ENTER USERNAME: ");
+		String usrnm = bfrd.readLine();
+		System.out.println("ENTER PASSWORD: ");
+		String pswd = bfrd.readLine();
+		
+		tndr_autry.setUsername(usrnm);
+		tndr_autry.setPassword(pswd);
+		String sql = "select * from tender_authority where username = ? and password = ?";
+		PreparedStatement stmt = con.prepareStatement(sql);
+		stmt.setString(1, tndr_autry.getUsername());
+		stmt.setString(2, tndr_autry.getPassword());
+		ResultSet rs = stmt.executeQuery();
+		
+		if(rs.next())
+		{
+			if(usrnm.equals(rs.getString("USERNAME")) && pswd.equals(rs.getString("PASSWORD")))
+			{
+				UserDAO usrdao1 = new UserDAO();
+				usrdao1.selectallrequest();
+				//call sms() method.
+			}
+		}
+		
+		return false;
+	}
+
+	@Override
+	public List<TenderRequest> selectallrequest() throws ClassNotFoundException, Exception {
+		
+		TenderRequestDAO tndrrqst = new TenderRequestDAO();
+		List<TenderRequest> lsttndrrqst = new ArrayList<TenderRequest>();
+		TenderRequest trqst = null;
+		ConnectionManager cmgr = new ConnectionManager();
+		Connection con = cmgr.getConnection();
+		
+		String sql = "select * from tender_request";
+		PreparedStatement stmt = con.prepareStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		
+		if(rs.next())
+		{
+			trqst = new TenderRequest(null, null, null, null, null, null);
+			System.out.println("NAME: " + rs.getString(1));
+			System.out.println("TENDER NO: " + rs.getString(2));
+			System.out.println("COMPANY NAME: " + rs.getString(3));
+			System.out.println("MOBILE NUMBER: " + rs.getString(4));
+			System.out.println("ESTIMATE AMOUNT: " + rs.getString(5));
+			System.out.println("DATE: " + rs.getString(6));
+			lsttndrrqst.add(trqst);
+			
+			//YOU CAN APPROVE USER THROUGH SMS API
+			// CALL METHOD SMS();
+		}
+		
+		
+		
+		return null;
+	}
+	
+	
 
 }
